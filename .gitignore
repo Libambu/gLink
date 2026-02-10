@@ -1,0 +1,69 @@
+# ===================== 1. Go 核心编译/依赖文件（必加） =====================
+# Go 编译生成的可执行文件（所有无后缀的二进制文件）
+*
+!*/
+!*.go
+!*.mod
+!*.sum
+!*.yaml
+!*.yml
+!*.toml
+!*.json
+!*.md
+!.gitignore
+# Go 模块缓存（go mod 生成的依赖缓存）
+/pkg/
+# Go 编译的中间产物（如 go build 生成的 obj 文件）
+/obj/
+# Go 1.16+ 的模块缓存（如果项目用了 go work）
+/go.work
+/go.work.sum
+# GOPATH 模式下的 bin 目录（编译后的可执行文件）
+/bin/
+
+# ===================== 2. 开发工具/编辑器配置（常用） =====================
+# VS Code
+.vscode/
+# IntelliJ/Goland
+.idea/
+*.iml
+*.iws
+*.ipr
+/out/
+# Vim
+*.swp
+*.swo
+.*.sw?
+unite.log
+Session.vim
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\\#*
+
+# ===================== 3. 环境/临时文件（场景补充） =====================
+# 日志文件
+*.log
+/logs/
+/log/
+# 配置文件（包含敏感信息，如密钥、端口等，只提交模板）
+config.yaml
+config.json
+!config.example.yaml  # 保留配置模板
+# 临时文件
+*.tmp
+*.temp
+/tmp/
+# 操作系统相关
+.DS_Store  # Mac
+Thumbs.db  # Windows
+# 测试相关（如覆盖率报告）
+*.out
+/coverage/
+# Docker 相关（如需忽略构建产物）
+/.dockerignore
