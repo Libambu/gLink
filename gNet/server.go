@@ -1,6 +1,7 @@
 package gNet
 
 import (
+	"errors"
 	"fmt"
 	"gLink/gIface"
 	"net"
@@ -32,6 +33,8 @@ func (s *Server) Start() {
 		return
 	}
 	fmt.Printf("[success]glink Server %s successful \n", s.Name)
+	var conId uint32
+	conId = 1
 	//建立一个携程开始循环等待
 	go func() {
 		for {
@@ -40,22 +43,10 @@ func (s *Server) Start() {
 				fmt.Println("[err]glink acceptTcp err:", err)
 				continue
 			}
-			go func(con *net.TCPConn) {
-				defer con.Close()
-				for true {
-					//V0.1数据echo
-					buf := make([]byte, 512)
-					cnt, err := con.Read(buf)
-					remoteAddr := con.RemoteAddr()
-					fmt.Printf("receive msg from %s : %s\n", remoteAddr.String(), string(buf[:cnt]))
-					msg := "[echo]" + string(buf[:cnt])
-					if err != nil {
-						fmt.Println("[err]glink read err:", err)
-						continue
-					}
-					con.Write([]byte(msg + "\r\n"))
-				}
-			}(con)
+			//创建链接模块
+			dealConnect := NewConnect(con, conId, defaultCallBack)
+			go dealConnect.Start()
+			conId++
 		}
 	}()
 }
@@ -77,4 +68,16 @@ func NewServer(name string) gIface.IServer {
 		Port:      8999,
 	}
 	return s
+}
+
+// TODO 目前这个Hander方法是写死的，应该由用户创建，进行传递
+func defaultCallBack(conn *net.TCPConn, data []byte, cnt int) error {
+	msg := string(data[:cnt])
+	msg = "[echo]" + msg
+	_, err := conn.Write([]byte(msg + "\r\n"))
+	if err != nil {
+		fmt.Println("server writer err", err)
+		return errors.New("default CallBack err")
+	}
+	return nil
 }
