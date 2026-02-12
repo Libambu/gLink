@@ -1,7 +1,6 @@
 package gNet
 
 import (
-	"errors"
 	"fmt"
 	"gLink/gIface"
 	"net"
@@ -16,6 +15,8 @@ type Server struct {
 	Ip string
 	//定义服务器端口号port
 	Port int
+	//当前Server的绑定的Router对象
+	Router gIface.IRouter
 }
 
 func (s *Server) Start() {
@@ -44,7 +45,7 @@ func (s *Server) Start() {
 				continue
 			}
 			//创建链接模块
-			dealConnect := NewConnect(con, conId, defaultCallBack)
+			dealConnect := NewConnect(con, conId, s.Router)
 			go dealConnect.Start()
 			conId++
 		}
@@ -60,24 +61,17 @@ func (s *Server) Serve() {
 	select {}
 }
 
+func (s *Server) AddRouter(router gIface.IRouter) {
+	s.Router = router
+}
+
 func NewServer(name string) gIface.IServer {
 	s := &Server{
 		Name:      name,
 		IpVersion: "tcp4",
 		Ip:        "0.0.0.0",
 		Port:      8999,
+		Router:    nil,
 	}
 	return s
-}
-
-// TODO 目前这个Hander方法是写死的，应该由用户创建，进行传递
-func defaultCallBack(conn *net.TCPConn, data []byte, cnt int) error {
-	msg := string(data[:cnt])
-	msg = "[echo]" + msg
-	_, err := conn.Write([]byte(msg + "\r\n"))
-	if err != nil {
-		fmt.Println("server writer err", err)
-		return errors.New("default CallBack err")
-	}
-	return nil
 }

@@ -13,19 +13,19 @@ type Connection struct {
 	ConnID uint32
 	//当前的连接状态
 	isClosed bool
-	//当前连接所绑定的业务处理方法
-	handleFunc gIface.HandleFunc
 	//监控当前conn是否关闭的Channel
 	ExitChan chan bool
+	//该链接的Router
+	Router gIface.IRouter
 }
 
-func NewConnect(conn *net.TCPConn, connID uint32, callBack gIface.HandleFunc) *Connection {
+func NewConnect(conn *net.TCPConn, connID uint32, router gIface.IRouter) *Connection {
 	c := &Connection{
-		Conn:       conn,
-		ConnID:     connID,
-		handleFunc: callBack,
-		isClosed:   false,
-		ExitChan:   make(chan bool, 1),
+		Conn:     conn,
+		ConnID:   connID,
+		Router:   router,
+		isClosed: false,
+		ExitChan: make(chan bool, 1),
 	}
 	return c
 }
@@ -39,16 +39,24 @@ func (c *Connection) GReader() {
 	}()
 	for true {
 		buf := make([]byte, 512)
-		cnt, err := c.Conn.Read(buf)
+		_, err := c.Conn.Read(buf)
 		if err != nil {
 			fmt.Println("connId:", c.ConnID, "receiver err :", err)
 			break
 		}
-		err = c.handleFunc(c.Conn, buf, cnt)
-		if err != nil {
-			fmt.Println("connId:", c.ConnID, " handleFunc err :", err)
-			break
+		//err = c.handleFunc(c.Conn, buf, cnt)
+		//if err != nil {
+		//	fmt.Println("connId:", c.ConnID, " handleFunc err :", err)
+		//	break
+		//}
+		//3.0调用路由
+		req := Request{
+			coon: c,
+			data: buf,
 		}
+		c.Router.PreHandler(&req)
+		c.Router.Handler(&req)
+		c.Router.PostHandler(&req)
 	}
 }
 
