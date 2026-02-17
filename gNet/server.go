@@ -3,6 +3,7 @@ package gNet
 import (
 	"fmt"
 	"gLink/gIface"
+	"gLink/utils"
 	"net"
 )
 
@@ -65,12 +66,12 @@ func (s *Server) AddRouter(router gIface.IRouter) {
 	s.Router = router
 }
 
-func NewServer(name string) gIface.IServer {
+func NewServer() gIface.IServer {
 	s := &Server{
-		Name:      name,
+		Name:      utils.GlobalObject.ServerName,
 		IpVersion: "tcp4",
-		Ip:        "0.0.0.0",
-		Port:      8999,
+		Ip:        utils.GlobalObject.ServerIp,
+		Port:      utils.GlobalObject.ServerPort,
 		Router:    nil,
 	}
 	return s

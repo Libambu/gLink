@@ -3,6 +3,7 @@ package gNet
 import (
 	"fmt"
 	"gLink/gIface"
+	"gLink/utils"
 	"net"
 )
 
@@ -38,7 +39,7 @@ func (c *Connection) GReader() {
 		fmt.Printf("GRead connId: %d closed successfully\n", c.ConnID)
 	}()
 	for true {
-		buf := make([]byte, 512)
+		buf := make([]byte, utils.GlobalObject.MaxPackageSize)
 		_, err := c.Conn.Read(buf)
 		if err != nil {
 			fmt.Println("connId:", c.ConnID, "receiver err :", err)
